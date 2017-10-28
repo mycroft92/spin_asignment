@@ -16,4 +16,4 @@ all: progress.f mutex.s lockout.f
 	echo "***Compiled***"
 
 clean:
-	rm -rf *.s *.f
+	rm -rf *.s *.f *.trail
