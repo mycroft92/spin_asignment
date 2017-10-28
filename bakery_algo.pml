@@ -1,7 +1,13 @@
 /*Author : mycroft
   Date   : 21-oct
 */
+//Defines for program and verification section
 #define N 3
+#define p (ncrit<=1)
+#define ncs (P[1]@noncritical)
+#define wt (P[1]@wait)
+#define cs   (P[1]@critical)
+
 
 typedef t {
     int num;
@@ -11,7 +17,6 @@ t ticket[N];
 
 bool choosing[N];
 bool sharedBit;
-short tval;
 int ncrit;
 
 inline dispense( id, i, max){
@@ -46,7 +51,7 @@ proctype P(byte id) {
         dispense(id,i,max);
         choosing[id] = 0;
         j=0;
-        //allow into critical section if minimum
+        //allow into critical section if minimum, the process exits this loop only it is it's turn
         do
         :: j<N && choosing[j] == 0 ->
             if
