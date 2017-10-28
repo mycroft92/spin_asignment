@@ -1,35 +1,78 @@
 /*Author : mycroft
   Date   : 21-oct
 */
-int N =3
-byte ncrit; //processes in critical section
-int nprocess;   //total pids active
-bool gcolor; //The color of last process that went into crit section
+#define N 3
 
-typedef ticket {
-    int number;
-    bool color; //0 for black, 1 for white
+typedef t {
+    int num;
+    bool color;
+};
+t ticket[N];
+
+bool choosing[N];
+bool sharedBit;
+short tval;
+int ncrit;
+
+inline dispense( id, i, max){
+    i=0;
+    max =0;
+    do
+    :: i<N -> if
+              :: ticket[i].num > max -> max =ticket[i].num;
+              :: max >= ticket[i].num;
+              fi;
+    :: else ->break;
+    od;
+    ticket[id].num = 1+max;
+    ticket[id].color = sharedBit;
+
+}
+//checks according to condition 1
+inline colorcheck (l,k){
+    atomic {(ticket[l].color != ticket[k].color) && (ticket[l].color != sharedBit)}
+}
+//checks according to conditions 2&3 in pdf
+inline numbercheck (m,n){
+    atomic {(ticket[m].num < ticket[n].num)||((ticket[m].num == ticket[n].num)&&(m<n))}
 }
 
-proctype p (ticket t){
-        bool mycolor = gcolor;
-        npid++;
-        printf("My pid is: %d\n",_pid);
-        (gcolor != mycolor) || ()
-        ncrit++;
+proctype P(byte id) {
+    int i,j,max;
+    //t   ticket;
+    noncritical:
+        choosing[id] = 1;
+    wait:
+        dispense(id,i,max);
+        choosing[id] = 0;
+        j=0;
+        //allow into critical section if minimum
+        do
+        :: j<N && choosing[j] == 0 ->
+            if
+            :: colorcheck(j,id) -> ticket[j].num ==0; j++;//wait until j finishes execution,color is lower than current process
+            :: numbercheck(j,id)-> ticket[j].num ==0; j++;//wait until j finishes execution,num is lower than current process
+            :: numbercheck(id,j)-> j++; //Current process has higher priority than j
+            fi;
+        :: atomic {j==N -> ncrit++} break;
+        od;
+    critical:
         assert(ncrit==1);
-        gcolor = !mycolor;
+        sharedBit  = 1-sharedBit;
         ncrit--;
-        nprocess--;
+        //releasing lock
+        ticket[id].num = 0;
+        goto noncritical
+
 }
 
 init {
+    atomic {
+        byte i=0;
+        do
+        :: i< N -> run P(i);i++;
+        :: else -> break;
+        od;
 
-    int lastprocess=0;
-    repeat:
-        if
-        :: nprocess < N-1 -> nprocess++;ticket t= {lastprocess+1,gcolor};lastprocess = run p(t);
-        ::else
-        fi
-
+    }
 }
