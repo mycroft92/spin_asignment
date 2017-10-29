@@ -45,8 +45,9 @@ inline numbercheck (m,n){
     atomic {(ticket[m].num < ticket[n].num)||((ticket[m].num == ticket[n].num)&&(m<n))}
 }
 
-active [N] proctype P(byte id) {
-    int i,j,max;
+active [N] proctype P() {
+    int i,j,max,id;
+    id = _pid;
     //t   ticket;
     noncritical:
         choosing[id] = 1;
@@ -85,4 +86,4 @@ active [N] proctype P(byte id) {
 
     }
 }*/
-ltl claim{  <>[](wt1&&wt2&&wt3)}
+ltl deadlock{ !( <>[](wt1&&wt2&&wt3))}
