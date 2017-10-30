@@ -86,4 +86,5 @@ active [N] proctype P() {
 
     }
 }*/
-ltl deadlock{ !( <>[](wt1&&wt2&&wt3))}
+//ltl deadlock {!( <>[](wt1&&wt2&&wt3))}
+ltl lockout {[]<> cs1-> []<> ncs1}
