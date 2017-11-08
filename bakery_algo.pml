@@ -59,19 +59,19 @@ active [N] proctype P() {
         do
         :: j<N && choosing[j] == 0 ->
             if
-            :: colorcheck(j,id) -> (ticket[j].num ==0)||(lock); j++;//wait until j finishes execution,color is lower than current process
+            :: colorcheck(j,id) -> (ticket[j].num ==0); j++;//wait until j finishes execution,color is lower than current process
             :: numbercheck(j,id)-> ticket[j].num ==0; j++;//wait until j finishes execution,num is lower than current process
             :: numbercheck(id,j)-> j++; //Current process has higher priority than j
             fi;
-        :: atomic {j==N -> ncrit++;lock=1} break;
+        :: j==N -> ncrit++; break;
         od;
     critical:
         assert(ncrit==1);
         sharedBit  = 1-sharedBit;
         ncrit--;
         //releasing lock
-        atomic{lock =0;
-        ticket[id].num = 0;}
+
+        ticket[id].num = 0;
         goto noncritical
 
 }
@@ -86,5 +86,7 @@ active [N] proctype P() {
 
     }
 }*/
-//ltl deadlock {!( <>[](wt1&&wt2&&wt3))}
+ltl deadlock {!( <>[](wt1&&wt2&&wt3))}
 ltl lockout {[]<> cs1-> []<> ncs1}
+ltl progress {[]<> wt1 -> []<> cs1}
+ltl mutex {[]p}
